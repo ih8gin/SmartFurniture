@@ -20,99 +20,99 @@
 #include "ds18b20.h" 
 #include "exti.h"
 
-/** Ò»Ğ©°åÔØ×ÊÔ´Ê¹ÓÃËµÃ÷
-ledµÆ£º
+/** ä¸€äº›æ¿è½½èµ„æºä½¿ç”¨è¯´æ˜
+ledç¯ï¼š
 	LED_Init()
-	ÓĞÁ½¸öledµÆ£¬LED0ÎªºìµÆ¡¢LED1ÎªÂÌµÆ
-	LEDx = 1 ÁÁ
-		 = 0 Ãğ
-·äÃùÆ÷£º
+	æœ‰ä¸¤ä¸ªledç¯ï¼ŒLED0ä¸ºçº¢ç¯ã€LED1ä¸ºç»¿ç¯
+	LEDx = 1 äº®
+		 = 0 ç­
+èœ‚é¸£å™¨ï¼š
 	BEEP_Init()
-	BEEP = 1 Ïì
-		 = 0 ²»Ïì
-key°´¼ü£º
+	BEEP = 1 å“
+		 = 0 ä¸å“
+keyæŒ‰é”®ï¼š
 	KEY_Init()
-	ÓĞÈı¸ö°´¼üKEY0¡¢KEY1¡¢KEY_UP
-	Ê¹ÓÃkey = KEY_Scan(0)»ñµÃ°´¼üÖµ
-	key = 0 Ã»ÓĞ°´¼ü±»°´ÏÂ
-		= KEY0_PRES KEY0±»°´ÏÂ
-		= KEY1_PRES KEY1±»°´ÏÂ
-		= WKUP_PRES KEY_UP±»°´ÏÂ
-´®¿ÚÍ¨ĞÅ£º
-	Êı¾İÏß½ÓUSB_232¶Ë¿Ú
-	uart_init(Baud) ÉèÖÃ²¨ÌØÂÊ
-	¿ÉÒÔÊ¹ÓÃprintfº¯ÊıÔÚxcom½çÃæ²é¿´Êä³ö£¬Ò²¿ÉÒÔ´Óxcom½çÃæÊäÈë
-	¡®\r\n¡¯ ±íÊ¾»»ĞĞ
-ÄÚ´æ¹ÜÀí£º
-	my_mem_init(SRAMIN) ³õÊ¼»¯ÄÚ²¿ÄÚ´æ³Ø
-	target=mymalloc(SRAMIN,n) ÎªtargetÉêÇën¸ö×Ö½ÚµÄÄÚ´æ¿Õ¼ä
-	mymemset(target,val,len) ½«targetµÄÇ°len¸ö×Ö½ÚµÄÖµÉèÖÃÎªval
-	myfree(SRAMIN,target) ÊÍ·ÅtargetÕ¼ÓÃµÄÄÚ´æ
+	æœ‰ä¸‰ä¸ªæŒ‰é”®KEY0ã€KEY1ã€KEY_UP
+	ä½¿ç”¨key = KEY_Scan(0)è·å¾—æŒ‰é”®å€¼
+	key = 0 æ²¡æœ‰æŒ‰é”®è¢«æŒ‰ä¸‹
+		= KEY0_PRES KEY0è¢«æŒ‰ä¸‹
+		= KEY1_PRES KEY1è¢«æŒ‰ä¸‹
+		= WKUP_PRES KEY_UPè¢«æŒ‰ä¸‹
+ä¸²å£é€šä¿¡ï¼š
+	æ•°æ®çº¿æ¥USB_232ç«¯å£
+	uart_init(Baud) è®¾ç½®æ³¢ç‰¹ç‡
+	å¯ä»¥ä½¿ç”¨printfå‡½æ•°åœ¨xcomç•Œé¢æŸ¥çœ‹è¾“å‡ºï¼Œä¹Ÿå¯ä»¥ä»xcomç•Œé¢è¾“å…¥
+	â€˜\r\nâ€™ è¡¨ç¤ºæ¢è¡Œ
+å†…å­˜ç®¡ç†ï¼š
+	my_mem_init(SRAMIN) åˆå§‹åŒ–å†…éƒ¨å†…å­˜æ± 
+	target=mymalloc(SRAMIN,n) ä¸ºtargetç”³è¯·nä¸ªå­—èŠ‚çš„å†…å­˜ç©ºé—´
+	mymemset(target,val,len) å°†targetçš„å‰lenä¸ªå­—èŠ‚çš„å€¼è®¾ç½®ä¸ºval
+	myfree(SRAMIN,target) é‡Šæ”¾targetå ç”¨çš„å†…å­˜
 */
 
-//¶¨ÒåÈ«¾Ö±äÁ¿
-extern u8 ov_sta;	//ÔÚexit.cÀïÃæ¶¨Òå
-extern u8 ov_frame;	//ÔÚtimer.cÀïÃæ¶¨Òå	 
-SysPara AS608Para;//Ö¸ÎÆÄ£¿éAS608²ÎÊı
-u16 ValidN;//Ä£¿éÄÚÓĞĞ§Ö¸ÎÆ¸öÊı
+//å®šä¹‰å…¨å±€å˜é‡
+extern u8 ov_sta;	//åœ¨exit.cé‡Œé¢å®šä¹‰
+extern u8 ov_frame;	//åœ¨timer.cé‡Œé¢å®šä¹‰	 
+SysPara AS608Para;//æŒ‡çº¹æ¨¡å—AS608å‚æ•°
+u16 ValidN;//æ¨¡å—å†…æœ‰æ•ˆæŒ‡çº¹ä¸ªæ•°
 
 
-//ÒÔÏÂÎª¹©Ö÷¿Øº¯Êıµ÷ÓÃµÄ½Ó¿Ú
-u8 is_safe(void);			// ¸ù¾İÎÂ¶ÈºÍÆøÌåÅ¨¶ÈÅĞ¶ÏÊÇ·ñ°²È«
+//ä»¥ä¸‹ä¸ºä¾›ä¸»æ§å‡½æ•°è°ƒç”¨çš„æ¥å£
+u8 is_safe(void);			// æ ¹æ®æ¸©åº¦å’Œæ°”ä½“æµ“åº¦åˆ¤æ–­æ˜¯å¦å®‰å…¨
 
-u8 face_recognition();		// ÈËÁ³Ê¶±ğ		Î´ÊµÏÖ£¡
-u8 face_add(void);			// Â¼ÈëÈËÁ³		Î´ÊµÏÖ£¡
-void face_delete(void);		//É¾³ıÈËÁ³		Î´ÊµÏÖ£¡
+u8 face_recognition();		// äººè„¸è¯†åˆ«		æœªå®ç°ï¼
+u8 face_add(void);			// å½•å…¥äººè„¸
+void face_delete(void);		// åˆ é™¤äººè„¸
 
-u8 fingerprint_recognition();	// Ö¸ÎÆÊ¶±ğ
-u8 fingerprint_add(void);		//Â¼ÈëÖ¸ÎÆ
-void fingerprint_delete(void);	//É¾³ıÖ¸ÎÆ
+u8 fingerprint_recognition();	// æŒ‡çº¹è¯†åˆ«
+u8 fingerprint_add(void);		//å½•å…¥æŒ‡çº¹
+void fingerprint_delete(void);	//åˆ é™¤æŒ‡çº¹
 
 
-//ÒÔÏÂÎª¹©½Ó¿Úµ÷ÓÃµÄ¹¦ÄÜ×Óº¯Êı
-u16 get_temperature(void); 	// »ñÈ¡ÎÂ¶È²ÎÊı
-u16 get_gas(void);			// »ñÈ¡ÆøÌåÅ¨¶È²ÎÊı		Î´ÊµÏÖ£¡
+//ä»¥ä¸‹ä¸ºä¾›æ¥å£è°ƒç”¨çš„åŠŸèƒ½å­å‡½æ•°
+u16 get_temperature(void); 	// è·å–æ¸©åº¦å‚æ•°
+u16 get_gas(void);			// è·å–æ°”ä½“æµ“åº¦å‚æ•°		æœªå®ç°ï¼
 
-void upload_pic(void);		//ÉÏ´«Í¼Æ¬Êı¾İÖÁ´®¿Ú
-u8 wait_ack(void);			//µÈ´ı´®¿Ú»Ø´«½á¹û		Î´ÊµÏÖ£¡
+void upload_pic(void);		//ä¸Šä¼ å›¾ç‰‡æ•°æ®è‡³ä¸²å£
+u8 wait_ack(void);			//ç­‰å¾…ä¸²å£å›ä¼ ç»“æœ		æœªå®ç°ï¼
 
-u8 press_FR(void);				//Ë¢Ö¸ÎÆ
-void ShowErrMessage(u8 ensure);	//ÏÔÊ¾È·ÈÏÂë´íÎóĞÅÏ¢
+u8 press_FR(void);				//åˆ·æŒ‡çº¹
+void ShowErrMessage(u8 ensure);	//æ˜¾ç¤ºç¡®è®¤ç é”™è¯¯ä¿¡æ¯
 
-//Ö÷¿Øº¯Êı
+//ä¸»æ§å‡½æ•°
 int main(void){	 
-	// ±äÁ¿¶¨Òå
+	// å˜é‡å®šä¹‰
 	u8 sensor=0;
 	u8 res;							 
-	u8 *pname;				//´øÂ·¾¶µÄÎÄ¼şÃû 
-	u8 key;					//¼üÖµ		   
+	u8 *pname;				//å¸¦è·¯å¾„çš„æ–‡ä»¶å 
+	u8 key;					//é”®å€¼		   
 	u32 i;						 
-	u8 sd_ok=1;				//0,sd¿¨²»Õı³£;1,SD¿¨Õı³£.
+	u8 sd_ok=1;				//0,sdå¡ä¸æ­£å¸¸;1,SDå¡æ­£å¸¸.
 	u16 color;
 	u8 grey;
 	 
-	// °åÔØ×ÊÔ´³õÊ¼»¯
-	delay_init();	    	 //ÑÓÊ±º¯Êı³õÊ¼»¯	  
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//ÉèÖÃÖĞ¶ÏÓÅÏÈ¼¶·Ö×éÎª×é2£º2Î»ÇÀÕ¼ÓÅÏÈ¼¶£¬2Î»ÏìÓ¦ÓÅÏÈ¼¶
-	uart_init(115200);	 	//´®¿Ú³õÊ¼»¯Îª115200
- 	usmart_dev.init(72);		//³õÊ¼»¯USMART		
- 	LED_Init();		  			//³õÊ¼»¯ÓëLEDÁ¬½ÓµÄÓ²¼ş½Ó¿Ú
-	KEY_Init();					//³õÊ¼»¯°´¼ü
-	BEEP_Init();        		//·äÃùÆ÷³õÊ¼»¯	 
-	W25QXX_Init();				//³õÊ¼»¯W25Q128
- 	my_mem_init(SRAMIN);		//³õÊ¼»¯ÄÚ²¿ÄÚ´æ³Ø
-	exfuns_init();				//ÎªfatfsÏà¹Ø±äÁ¿ÉêÇëÄÚ´æ  
- 	f_mount(fs[0],"0:",1); 		//¹ÒÔØSD¿¨ 
- 	f_mount(fs[1],"1:",1); 		//¹ÒÔØFLASH. 
-	DS18B20_Init();				//ÎÂ¶È´«¸ĞÆ÷³õÊ¼»¯
+	// æ¿è½½èµ„æºåˆå§‹åŒ–
+	delay_init();	    	 //å»¶æ—¶å‡½æ•°åˆå§‹åŒ–	  
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//è®¾ç½®ä¸­æ–­ä¼˜å…ˆçº§åˆ†ç»„ä¸ºç»„2ï¼š2ä½æŠ¢å ä¼˜å…ˆçº§ï¼Œ2ä½å“åº”ä¼˜å…ˆçº§
+	uart_init(115200);	 	//ä¸²å£åˆå§‹åŒ–ä¸º115200
+ 	usmart_dev.init(72);		//åˆå§‹åŒ–USMART		
+ 	LED_Init();		  			//åˆå§‹åŒ–ä¸LEDè¿æ¥çš„ç¡¬ä»¶æ¥å£
+	KEY_Init();					//åˆå§‹åŒ–æŒ‰é”®
+	BEEP_Init();        		//èœ‚é¸£å™¨åˆå§‹åŒ–	 
+	W25QXX_Init();				//åˆå§‹åŒ–W25Q128
+ 	my_mem_init(SRAMIN);		//åˆå§‹åŒ–å†…éƒ¨å†…å­˜æ± 
+	exfuns_init();				//ä¸ºfatfsç›¸å…³å˜é‡ç”³è¯·å†…å­˜  
+ 	f_mount(fs[0],"0:",1); 		//æŒ‚è½½SDå¡ 
+ 	f_mount(fs[1],"1:",1); 		//æŒ‚è½½FLASH. 
+	DS18B20_Init();				//æ¸©åº¦ä¼ æ„Ÿå™¨åˆå§‹åŒ–
 	OV7725_Init();
-	OV7725_Window_Set(320,240,0);//QVGAÄ£Ê½Êä³ö
+	OV7725_Window_Set(320,240,0);//QVGAæ¨¡å¼è¾“å‡º
 	OV7725_CS=0;
-	TIM6_Int_Init(10000,7199);			//10Khz¼ÆÊıÆµÂÊ,1ÃëÖÓÖĞ¶Ï									  
-	EXTI8_Init();						//Ê¹ÄÜ¶¨Ê±Æ÷²¶»ñ
+	TIM6_Int_Init(10000,7199);			//10Khzè®¡æ•°é¢‘ç‡,1ç§’é’Ÿä¸­æ–­									  
+	EXTI8_Init();						//ä½¿èƒ½å®šæ—¶å™¨æ•è·
 	printf("Ready!\r\n");
 	
-	// Ö÷¿Ø³ÌĞòÈë¿Ú
+	// ä¸»æ§ç¨‹åºå…¥å£
 	while(1){
 		key = KEY_Scan(0);
 		if(key == KEY0_PRES)upload_pic();
@@ -120,22 +120,15 @@ int main(void){
 }
 
 
-u16 get_temperature(){
-	/**
-		·µ»ØÖµÎªµ±Ç°¼ì²âÉãÊÏ¶È*10
-	*/
-	u16 temperature;
-	temperature = DS18B20_Get_Temp();
-	printf("µ±Ç°ÎÂ¶ÈÎª%d.%d¡ãC\r\n",temperature/10,temperature%10);	//´òÓ¡ÎÂ¶ÈµÄÕûÊıÎ»ºÍĞ¡ÊıÎ»
-	return temperature;
-}
+
+//æ¥å£å®ç°
 
 u8 is_safe(){
 	/**
-	* ¹©Ö÷¿Øº¯Êıµ÷ÓÃ
-	* ¸ù¾İÎÂ¶ÈºÍÆøÌåÅ¨¶È²ÎÊıÅĞ¶Ï»·¾³ÊÇ·ñ°²È«
-	* ²»°²È«ÔòµãÁÁºìµÆ¡¢¿ªÆô·äÃùÆ÷±¨¾¯£¬²¢·µ»Ø0
-	* °²È«ÔòÏ¨ÃğºìµÆ¡¢¹Ø±Õ·äÃùÆ÷£¬·µ»Ø0
+	* ä¾›ä¸»æ§å‡½æ•°è°ƒç”¨
+	* æ ¹æ®æ¸©åº¦å’Œæ°”ä½“æµ“åº¦å‚æ•°åˆ¤æ–­ç¯å¢ƒæ˜¯å¦å®‰å…¨
+	* ä¸å®‰å…¨åˆ™ç‚¹äº®çº¢ç¯ã€å¼€å¯èœ‚é¸£å™¨æŠ¥è­¦ï¼Œå¹¶è¿”å›0
+	* å®‰å…¨åˆ™ç†„ç­çº¢ç¯ã€å…³é—­èœ‚é¸£å™¨ï¼Œè¿”å›0
 	*/
 	u16 temperature;
 	u16 gas;
@@ -151,62 +144,57 @@ u8 is_safe(){
 	}
 }
 
+u8 face_recognition(){
+	/**
+	* ä¾›ä¸»æ§å‡½æ•°è°ƒç”¨
+	* å°†æ‘„åƒå¤´é‡‡é›†åˆ°çš„å›¾åƒæ•°æ®é€šè¿‡ä¸²å£ä¸Šä¼ è‡³ä¸Šä½æœº
+	* ç­‰å¾…åœ¨ä¸Šä½æœºå¤„ç†å®Œæˆåè¿”å›çš„ä¿¡å·å¸§
+	* è‹¥è¯†åˆ«åˆ°åº“ä¸­äººè„¸ï¼Œè¿”å›1
+	* è‹¥æœªè¯†åˆ«åˆ°æœ‰æ•ˆäººè„¸ï¼Œè¿”å›0
+	*/
+	u8 ret;
+	upload_pic();
+	return wait_ack();
+}
+
+u8 face_add(void){
+	/**
+	* ä¾›ä¸»æ§å‡½æ•°è°ƒç”¨
+	* æ·»åŠ äººè„¸ç‰¹å¾
+	* è‹¥æ·»åŠ æˆåŠŸï¼Œè¿”å›1
+	* è‹¥æ·»åŠ å¤±è´¥ï¼Œè¿”å›0
+	*/
+	printf("è¯·åœ¨pythonä¸Šä½æœºå®Œæˆäººè„¸æ·»åŠ æ“ä½œï¼Œå°šä¸æ”¯æŒç”¨stm32æ‰§è¡Œæ­¤æ“ä½œ");
+	return 0;
+}
+
+void face_delete(void){
+	/**
+	* ä¾›ä¸»æ§å‡½æ•°è°ƒç”¨
+	* åˆ é™¤æŒ‡å®šäººè„¸ç‰¹å¾æˆ–æ¸…ç©ºäººè„¸ç‰¹å¾åº“
+	*/
+	printf("è¯·åœ¨pythonä¸Šä½æœºä¸Šå®Œæˆäººè„¸åˆ é™¤æ“ä½œï¼Œå°šä¸æ”¯æŒç”¨stm32æ‰§è¡Œæ­¤æ“ä½œ");
+}
+
 u8 fingerprint_recognition(){
 	/**
-	* ¹©Ö÷¿Øº¯Êıµ÷ÓÃ
-	* ¼ì²éÊÇ·ñÓĞÖ¸ÎÆ°´ÏÂ²¢×ö³ö»ØÓ¦
-	* ÈôÎŞÖ¸ÎÆ°´ÏÂ»ò°´ÏÂÖ¸ÎÆ´íÎó£¬·µ»Ø0
-	* ÈôÓĞÕıÈ·Ö¸ÎÆ°´ÏÂ£¬·µ»Ø1
+	* ä¾›ä¸»æ§å‡½æ•°è°ƒç”¨
+	* æ£€æŸ¥æ˜¯å¦æœ‰æŒ‡çº¹æŒ‰ä¸‹å¹¶åšå‡ºå›åº”
+	* è‹¥æ— æŒ‡çº¹æŒ‰ä¸‹æˆ–æŒ‰ä¸‹æŒ‡çº¹é”™è¯¯ï¼Œè¿”å›0
+	* è‹¥æœ‰æ­£ç¡®æŒ‡çº¹æŒ‰ä¸‹ï¼Œè¿”å›1
 	*/
-	if(PS_Sta){ //¼ì²âPS_Sta×´Ì¬£¬Èç¹ûÓĞÊÖÖ¸°´ÏÂ
-		press_FR();//Ë¢Ö¸ÎÆ
+	if(PS_Sta){ //æ£€æµ‹PS_StaçŠ¶æ€ï¼Œå¦‚æœæœ‰æ‰‹æŒ‡æŒ‰ä¸‹
+		press_FR();//åˆ·æŒ‡çº¹
 		delay_ms(600);
 	}
 }
 
-u8 press_FR(void){
-	/**
-	* ¹©Ö¸ÎÆÊ¶±ğ×Ó³ÌĞòµ÷ÓÃ
-	* ËÑË÷Ö¸ÎÆÊÇ·ñÔÚ¿âÖĞ
-	* ÔÚ¿âÖĞÔò·µ»Ø1
-	* ²»ÔÚ¿âÖĞÔò·µ»Ø0
-	*/
-	SearchResult seach;
-	u8 ensure;
-	u8 ret = 0;
-	char *str;
-	ensure=PS_GetImage();
-	if(ensure==0x00)//»ñÈ¡Í¼Ïñ³É¹¦ 
-	{	
-		ensure=PS_GenChar(CharBuffer1);
-		if(ensure==0x00) //Éú³ÉÌØÕ÷³É¹¦
-		{		
-			ensure=PS_HighSpeedSearch(CharBuffer1,0,AS608Para.PS_max,&seach);
-			if(ensure==0x00)//ËÑË÷³É¹¦
-			{				
-				printf("Ë¢Ö¸ÎÆ³É¹¦");				
-				str=mymalloc(SRAMIN,50);
-				sprintf(str,"È·ÓĞ´ËÈË,ID:%d  Æ¥ÅäµÃ·Ö:%d",seach.pageID,seach.mathscore);
-				printf((u8*)str);
-				myfree(SRAMIN,str);
-				ret = 1;
-			}
-			else 
-				ShowErrMessage(ensure);					
-	  }
-		else
-			ShowErrMessage(ensure);
-	}	
-	return ret;
-}
-
-
 u8 fingerprint_add(void){
 	/**
-	* ¹©Ö÷¿Øº¯Êıµ÷ÓÃ
-	* Ïò¿âÖĞÌí¼ÓÖ¸ÎÆÌØÕ÷
-	* Ìí¼Ó³É¹¦Ôò·µ»Ø1
-	* Ìí¼ÓÊ§°ÜÔò·µ»Ø0
+	* ä¾›ä¸»æ§å‡½æ•°è°ƒç”¨
+	* å‘åº“ä¸­æ·»åŠ æŒ‡çº¹ç‰¹å¾
+	* æ·»åŠ æˆåŠŸåˆ™è¿”å›1
+	* æ·»åŠ å¤±è´¥åˆ™è¿”å›0
 	*/
 	u8 i,ensure ,processnum=0;
 	u16 ID = 1;
@@ -217,60 +205,60 @@ u8 fingerprint_add(void){
 		switch (processnum){
 			case 0:
 				i++;
-				printf("Çë°´Ö¸ÎÆ");
+				printf("è¯·æŒ‰æŒ‡çº¹");
 				ensure=PS_GetImage();
 				if(ensure==0x00) {
 					BEEP=1;
-					ensure=PS_GenChar(CharBuffer1);//Éú³ÉÌØÕ÷
+					ensure=PS_GenChar(CharBuffer1);//ç”Ÿæˆç‰¹å¾
 					BEEP=0;
 					if(ensure==0x00){
-						printf("Ö¸ÎÆÕı³£");
+						printf("æŒ‡çº¹æ­£å¸¸");
 						i=0;
-						processnum=1;//Ìøµ½µÚ¶ş²½						
+						processnum=1;//è·³åˆ°ç¬¬äºŒæ­¥						
 					}else ShowErrMessage(ensure);				
 				}else ShowErrMessage(ensure);						
 				break;
 			case 1:
 				i++;
-				printf("Çë°´ÔÙ°´Ò»´ÎÖ¸ÎÆ");
+				printf("è¯·æŒ‰å†æŒ‰ä¸€æ¬¡æŒ‡çº¹");
 				ensure=PS_GetImage();
 				if(ensure==0x00) {
 					BEEP=1;
-					ensure=PS_GenChar(CharBuffer2);//Éú³ÉÌØÕ÷
+					ensure=PS_GenChar(CharBuffer2);//ç”Ÿæˆç‰¹å¾
 					BEEP=0;
 					if(ensure==0x00){
-						printf("Ö¸ÎÆÕı³£");
+						printf("æŒ‡çº¹æ­£å¸¸");
 						i=0;
-						processnum=2;//Ìøµ½µÚÈı²½
+						processnum=2;//è·³åˆ°ç¬¬ä¸‰æ­¥
 					}else ShowErrMessage(ensure);	
 				}else ShowErrMessage(ensure);		
 				break;
 			case 2:
-				printf("¶Ô±ÈÁ½´ÎÖ¸ÎÆ");
+				printf("å¯¹æ¯”ä¸¤æ¬¡æŒ‡çº¹");
 				ensure=PS_Match();
 				if(ensure==0x00) {
-					printf("¶Ô±È³É¹¦,Á½´ÎÖ¸ÎÆÒ»Ñù");
-					processnum=3;//Ìøµ½µÚËÄ²½
+					printf("å¯¹æ¯”æˆåŠŸ,ä¸¤æ¬¡æŒ‡çº¹ä¸€æ ·");
+					processnum=3;//è·³åˆ°ç¬¬å››æ­¥
 				}
 				else {
-					printf("¶Ô±ÈÊ§°Ü£¬ÇëÖØĞÂÂ¼ÈëÖ¸ÎÆ");
+					printf("å¯¹æ¯”å¤±è´¥ï¼Œè¯·é‡æ–°å½•å…¥æŒ‡çº¹");
 					ShowErrMessage(ensure);
 					i=0;
-					processnum=0;//Ìø»ØµÚÒ»²½		
+					processnum=0;//è·³å›ç¬¬ä¸€æ­¥		
 				}
 				delay_ms(1200);
 				break;
 			case 3:
-				printf("Éú³ÉÖ¸ÎÆÄ£°å");
+				printf("ç”ŸæˆæŒ‡çº¹æ¨¡æ¿");
 				ensure=PS_RegModel();
 				if(ensure==0x00) {
-					printf("Éú³ÉÖ¸ÎÆÄ£°å³É¹¦");
-					processnum=4;//Ìøµ½µÚÎå²½
+					printf("ç”ŸæˆæŒ‡çº¹æ¨¡æ¿æˆåŠŸ");
+					processnum=4;//è·³åˆ°ç¬¬äº”æ­¥
 				}else {processnum=0;ShowErrMessage(ensure);}
 				delay_ms(1200);
 				break;
 			case 4:	
-				printf("ÇëÊäÈë´¢´æID,°´KEY_0¼ÆÊı¼Ó,°´KEY_1ÇåÁã,°´KEY_UP±£´æ");
+				printf("è¯·è¾“å…¥å‚¨å­˜ID,æŒ‰KEY_0è®¡æ•°åŠ ,æŒ‰KEY_1æ¸…é›¶,æŒ‰KEY_UPä¿å­˜");
 				while(1){
 					key=KEY_Scan(0);
 					printf("ID = %d ? \r\n",ID);
@@ -284,10 +272,10 @@ u8 fingerprint_add(void){
 						break;
 					}
 				}
-				ensure=PS_StoreChar(CharBuffer2,ID);//´¢´æÄ£°å
+				ensure=PS_StoreChar(CharBuffer2,ID);//å‚¨å­˜æ¨¡æ¿
 				if(ensure==0x00) {							
-					printf("Â¼ÈëÖ¸ÎÆ³É¹¦");
-					PS_ValidTempleteNum(&ValidN);//¶Á¿âÖ¸ÎÆ¸öÊı
+					printf("å½•å…¥æŒ‡çº¹æˆåŠŸ");
+					PS_ValidTempleteNum(&ValidN);//è¯»åº“æŒ‡çº¹ä¸ªæ•°
 					//printf(AS608Para.PS_max-ValidN);
 					delay_ms(1500);LED0=0;
 					LED1=1;
@@ -296,25 +284,23 @@ u8 fingerprint_add(void){
 				break;				
 		}
 		delay_ms(400);
-		if(i==5){ //³¬¹ı5´ÎÃ»ÓĞ°´ÊÖÖ¸ÔòÍË³ö
+		if(i==5){ //è¶…è¿‡5æ¬¡æ²¡æœ‰æŒ‰æ‰‹æŒ‡åˆ™é€€å‡º
 			break;	
 		}				
 	}
 	return 0;
 }
 
-
-
 void fingerprint_delete(void){
 	/**
-	* ¹©Ö÷¿Øº¯Êıµ÷ÓÃ
-	* É¾³ıÖ¸¶¨IDÖ¸ÎÆ»òÇå¿ÕÖ¸ÎÆ¿â
+	* ä¾›ä¸»æ§å‡½æ•°è°ƒç”¨
+	* åˆ é™¤æŒ‡å®šIDæŒ‡çº¹æˆ–æ¸…ç©ºæŒ‡çº¹åº“
 	*/
 	u8  ensure;
 	u16 key;
 	u8 ID = 1;
-	printf("É¾³ıÖ¸ÎÆ");
-	printf("ÇëÊäÈëÉ¾³ıID,°´KEY_0¼ÆÊı¼Ó,°´KEY_1ÇåÁã,°´KEY_UP±£´æ, ID=0±íÊ¾Çå¿ÕÖ¸ÎÆ¿â");
+	printf("åˆ é™¤æŒ‡çº¹");
+	printf("è¯·è¾“å…¥åˆ é™¤ID,æŒ‰KEY_0è®¡æ•°åŠ ,æŒ‰KEY_1æ¸…é›¶,æŒ‰KEY_UPä¿å­˜, ID=0è¡¨ç¤ºæ¸…ç©ºæŒ‡çº¹åº“");
 	while(1){
 		key=KEY_Scan(0);
 		printf("ID = %d ? \r\n",ID);
@@ -329,57 +315,141 @@ void fingerprint_delete(void){
 		}
 	}
 	if(ID == 0)
-		ensure=PS_Empty();//Çå¿ÕÖ¸ÎÆ¿â
+		ensure=PS_Empty();//æ¸…ç©ºæŒ‡çº¹åº“
 	else 
-		ensure=PS_DeletChar(ID,1);//É¾³ıµ¥¸öÖ¸ÎÆ
+		ensure=PS_DeletChar(ID,1);//åˆ é™¤å•ä¸ªæŒ‡çº¹
 	if(ensure==0){
-		printf("É¾³ıÖ¸ÎÆ³É¹¦");		
+		printf("åˆ é™¤æŒ‡çº¹æˆåŠŸ");		
 	}
   else
 		ShowErrMessage(ensure);	
 	delay_ms(1200);
-	PS_ValidTempleteNum(&ValidN);//¶Á¿âÖ¸ÎÆ¸öÊı
+	PS_ValidTempleteNum(&ValidN);//è¯»åº“æŒ‡çº¹ä¸ªæ•°
 	delay_ms(50);
 }
 
-
-void ShowErrMessage(u8 ensure){
+u16 get_temperature(){
 	/**
-	* ¹©Ö¸ÎÆÊ¶±ğÏà¹Øº¯Êıµ÷ÓÃ
-	* ÏÔÊ¾È·ÈÏÂë´íÎóĞÅÏ¢
+	* ä¾›å®‰å…¨åˆ¤æ–­å‡½æ•°è°ƒç”¨
+	* æµ‹é‡å¹¶è¿”å›ç¯å¢ƒæ¸©åº¦
+	* è¿”å›å€¼ä¸ºå½“å‰æ£€æµ‹æ‘„æ°åº¦*10
 	*/
-	printf(EnsureMessage(ensure));
+	u16 temperature;
+	temperature = DS18B20_Get_Temp();
+	printf("å½“å‰æ¸©åº¦ä¸º%d.%dÂ°C\r\n",temperature/10,temperature%10);	//æ‰“å°æ¸©åº¦çš„æ•´æ•°ä½å’Œå°æ•°ä½
+	return temperature;
+}
+
+u16 get_gas(){
+	/**
+	* ä¾›å®‰å…¨åˆ¤æ–­å‡½æ•°è°ƒç”¨
+	* æµ‹é‡å¹¶è¿”å›ä¸€æ°§åŒ–ç¢³æ°”ä½“æµ“åº¦
+	*/
+	printf("æ°”ä½“æ£€æµ‹æ¨¡å—å°šæœªå®Œæˆï¼");
 }
 
 void upload_pic(void){
 	/**
-	* ¹©ÈËÁ³Ê¶±ğº¯Êıµ÷ÓÃ
-	* ÉÏ´«ÉãÏñÍ·²É¼¯µ½µÄÍ¼ÏñÊı¾İÖÁpython
+	* ä¾›äººè„¸è¯†åˆ«å‡½æ•°è°ƒç”¨
+	* ä¸Šä¼ æ‘„åƒå¤´é‡‡é›†åˆ°çš„å›¾åƒæ•°æ®è‡³python
 	*/
 	u32 j;
  	u16 color;	
 	u8	grey;
-	if(ov_sta)//ÓĞÖ¡ÖĞ¶Ï¸üĞÂ£¿
+	if(ov_sta)//æœ‰å¸§ä¸­æ–­æ›´æ–°ï¼Ÿ
 	{
-		OV7725_RRST=0;				//¿ªÊ¼¸´Î»¶ÁÖ¸Õë 
+		OV7725_RRST=0;				//å¼€å§‹å¤ä½è¯»æŒ‡é’ˆ 
 		OV7725_RCK_L;
 		OV7725_RCK_H;
 		OV7725_RCK_L;
-		OV7725_RRST=1;				//¸´Î»¶ÁÖ¸Õë½áÊø 
+		OV7725_RRST=1;				//å¤ä½è¯»æŒ‡é’ˆç»“æŸ 
 		OV7725_RCK_H; 
 		for(j=0;j<76800;j++)
 		{
 			OV7725_RCK_L;
-			color=GPIOC->IDR&0XFF;	//¶ÁÊı¾İ
+			color=GPIOC->IDR&0XFF;	//è¯»æ•°æ®
 			OV7725_RCK_H; 
 			color<<=8;  
 			OV7725_RCK_L;
-			color|=GPIOC->IDR&0XFF;	//¶ÁÊı¾İ
+			color|=GPIOC->IDR&0XFF;	//è¯»æ•°æ®
 			OV7725_RCK_H; 
 			printf("%d",color);
 			delay_ms(50);
 		}   							  
- 		ov_sta=0;					//ÇåÁãÖ¡ÖĞ¶Ï±ê¼Ç
+ 		ov_sta=0;					//æ¸…é›¶å¸§ä¸­æ–­æ ‡è®°
 		ov_frame++; 
 	} 
+}
+
+u8 wait_ack(void){
+	/**
+	* ä¾›äººè„¸è¯†åˆ«ç›¸å…³å‡½æ•°è°ƒç”¨
+	* æ¥å—æ¥è‡ªä¸Šä½æœºçš„ä¿¡å·å¸§
+	* æ”¶åˆ°è¿ç»­ä¸‰ä¸ªä¸€æ ·çš„ä¿¡å·åˆ™ç¡®è®¤
+	* å¹¶è¿”å›æ¥æ”¶åˆ°çš„ä¿¡å·
+	*/
+	u16 len;
+	u16 t;
+	u8 cnt;
+	u8 recv;
+	while(1){
+		if(USART_RX_STA&0x8000){					   
+			len=USART_RX_STA&0x3fff;//å¾—åˆ°æ­¤æ¬¡æ¥æ”¶åˆ°çš„æ•°æ®é•¿åº¦
+			for(t=0;t<len;t++){
+				if(recv != USART_RX_BUF[t]){
+					recv = USART_RX_BUF[t];
+					cnt = 0;
+				}else{
+					cnt++;
+				}
+				if(cnt>3)break;
+			}
+			USART_RX_STA=0;
+		}
+	}
+	return recv;
+}
+
+u8 press_FR(void){
+	/**
+	* ä¾›æŒ‡çº¹è¯†åˆ«å­ç¨‹åºè°ƒç”¨
+	* æœç´¢æŒ‡çº¹æ˜¯å¦åœ¨åº“ä¸­
+	* åœ¨åº“ä¸­åˆ™è¿”å›1
+	* ä¸åœ¨åº“ä¸­åˆ™è¿”å›0
+	*/
+	SearchResult seach;
+	u8 ensure;
+	u8 ret = 0;
+	char *str;
+	ensure=PS_GetImage();
+	if(ensure==0x00)//è·å–å›¾åƒæˆåŠŸ 
+	{	
+		ensure=PS_GenChar(CharBuffer1);
+		if(ensure==0x00) //ç”Ÿæˆç‰¹å¾æˆåŠŸ
+		{		
+			ensure=PS_HighSpeedSearch(CharBuffer1,0,AS608Para.PS_max,&seach);
+			if(ensure==0x00)//æœç´¢æˆåŠŸ
+			{				
+				printf("åˆ·æŒ‡çº¹æˆåŠŸ");				
+				str=mymalloc(SRAMIN,50);
+				sprintf(str,"ç¡®æœ‰æ­¤äºº,ID:%d  åŒ¹é…å¾—åˆ†:%d",seach.pageID,seach.mathscore);
+				printf((u8*)str);
+				myfree(SRAMIN,str);
+				ret = 1;
+			}
+			else 
+				ShowErrMessage(ensure);					
+	  }
+		else
+			ShowErrMessage(ensure);
+	}	
+	return ret;
+}
+
+void ShowErrMessage(u8 ensure){
+	/**
+	* ä¾›æŒ‡çº¹è¯†åˆ«ç›¸å…³å‡½æ•°è°ƒç”¨
+	* æ˜¾ç¤ºç¡®è®¤ç é”™è¯¯ä¿¡æ¯
+	*/
+	printf(EnsureMessage(ensure));
 }
