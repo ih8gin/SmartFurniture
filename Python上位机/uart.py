@@ -5,11 +5,15 @@ import serial.tools.list_ports
 import time
 from faceRec import load_img_from_vector, init, check
 
+BAUD_RATE = 115200
+BYTE_SIZE = 8
+ENCODED_MODE = 'gbk'
+
 ports = list(serial.tools.list_ports.comports())
 for i in ports:
     print(i.name)
 
-ser = serial.Serial('COM3', 115200, timeout=0.01, bytesize=8, stopbits=1)
+ser = serial.Serial('COM3', BAUD_RATE, timeout=0.01, bytesize=BYTE_SIZE, stopbits=1)
 
 i = 0
 pic_buffer = numpy.zeros((76800,1), dtype=int)
@@ -24,7 +28,7 @@ while True:
     recv = ser.readline()
     if recv != b'':
         if len(recv) > 8:
-            print(recv.decode('gbk'))
+            print(recv.decode(ENCODED_MODE))
         else:
             if i%10000 == 0:
                 print("No.", i, ", receive:", recv.decode())
