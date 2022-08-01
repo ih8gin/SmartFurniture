@@ -3,3 +3,9 @@
 
 项目已经完成验收
 readme很快就会写成来惹
+
+环境
+keil:5
+python:3.7.11
+numpy:1.19.2
+pserial:3.5
